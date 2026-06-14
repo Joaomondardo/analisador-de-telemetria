@@ -1,0 +1,62 @@
+# ============================================================
+# .gitignore — Analisador de Telemetria (C++ / CMake)
+# ============================================================
+
+# --- Diretório de build ---
+build/
+out/
+cmake-build-*/
+_build/
+
+# --- Binários e objetos compilados ---
+*.exe
+*.out
+*.app
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dll
+*.dylib
+
+# --- Arquivos de cache / gerados pelo CMake ---
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
+compile_commands.json
+install_manifest.txt
+*.cmake
+!CMakeLists.txt
+
+# --- Arquivos de cache do VSCode ---
+.vscode/
+.vs/
+
+# --- Arquivos de cache do CLion / JetBrains ---
+.idea/
+cmake-build-debug/
+cmake-build-release/
+
+# --- Graphify (análise de código, gerado automaticamente) ---
+graphify-out/
+
+# --- Logs e arquivos temporários ---
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+
+# --- Dados sensíveis ou gerados localmente ---
+data/*.csv
+data/*.bin
+
+# --- macOS ---
+.DS_Store
+
+# --- Windows ---
+Thumbs.db
+desktop.ini
