@@ -2,31 +2,41 @@
 
 #include <cstddef>
 #include <cstring>
-
 #include <string>
+
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
 
 namespace Telemetry {
 
 /**
- * RAII wrapper for a read‑only memory‑mapped file on Windows.
- * It opens the file for reading, creates a file mapping, maps the whole view,
- * and provides const access to the data. All resources are released in the
- * destructor.
+ * RAII wrapper for a read‑only memory‑mapped file.
+ * Provides a Windows implementation (Win32 API) and a POSIX implementation
+ * (mmap).
  */
 class MemoryMappedFile {
 public:
-    explicit MemoryMappedFile(const std::string& path);
-    ~MemoryMappedFile();
+  explicit MemoryMappedFile(const std::string &path);
+  ~MemoryMappedFile();
 
-    const char* data() const noexcept { return data_; }
-    std::size_t size() const noexcept { return size_; }
+  const char *data() const noexcept { return data_; }
+  std::size_t size() const noexcept { return size_; }
 
 private:
-    HANDLE fileHandle_{ INVALID_HANDLE_VALUE };
-    HANDLE mappingHandle_{ nullptr };
-    const char* data_{ nullptr };
-    std::size_t size_{ 0 };
+#ifdef _WIN32
+  HANDLE fileHandle_{INVALID_HANDLE_VALUE};
+  HANDLE mappingHandle_{nullptr};
+#else
+  int fd_{-1};
+#endif
+  const char *data_{nullptr};
+  std::size_t size_{0};
 };
 
 } // namespace Telemetry

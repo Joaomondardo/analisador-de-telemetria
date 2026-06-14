@@ -16,6 +16,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 add_library(telemetry_core STATIC
     src/memory_mapped_file.cpp
     src/telemetry_analyzer.cpp
+    src/telemetry_parser.cpp
 )
 # Export include path for consumers
 target_include_directories(telemetry_core PUBLIC ${PROJECT_SOURCE_DIR}/include)

@@ -14,8 +14,9 @@ TelemetryAnalyzer::TelemetryAnalyzer(const std::vector<TelemetryData> &data)
 double TelemetryAnalyzer::getAverageSpeed() const {
     if (m_data.empty())
         return 0.0;
-    double sum = std::reduce(std::execution::par, m_data.begin(), m_data.end(), 0.0,
-        [](double s, const TelemetryData &d) { return s + d.speed; });
+    double sum = std::transform_reduce(std::execution::par, m_data.begin(), m_data.end(), 0.0,
+        std::plus<>(),
+        [](const TelemetryData &d) { return d.speed; });
     return sum / m_data.size();
 }
 
