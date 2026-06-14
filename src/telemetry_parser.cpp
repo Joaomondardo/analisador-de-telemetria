@@ -1,22 +1,22 @@
 #include "telemetry_parser.hpp"
 #include "memory_mapped_file.hpp"
 #include <array>
-#include <string>
+#include <cstring>
 #include <vector>
 
 namespace Telemetry {
 
 // Load CSV by memory‑mapping the file and delegating to buffer parser
-std::vector<TelemetryData>
+std::vector<TelemetryRecord>
 TelemetryParser::loadFromCSV(const std::string &filepath) const {
   MemoryMappedFile mmf(filepath);
   return loadFromBuffer(std::string_view(mmf.data(), mmf.size()));
 }
 
 // Zero‑copy parsing from a memory buffer
-std::vector<TelemetryData>
+std::vector<TelemetryRecord>
 TelemetryParser::loadFromBuffer(std::string_view buffer) const {
-  std::vector<TelemetryData> data;
+  std::vector<TelemetryRecord> data;
   size_t pos = 0;
   // Skip header line
   size_t eol = buffer.find('\n', pos);
@@ -49,7 +49,7 @@ TelemetryParser::loadFromBuffer(std::string_view buffer) const {
     if (idx < 3)
       continue; // malformed line
     try {
-      TelemetryData entry;
+      TelemetryRecord entry;
       entry.timestamp =
           static_cast<uint64_t>(std::stod(std::string(fields[0])) * 1000.0);
       entry.speed = std::stod(std::string(fields[1]));

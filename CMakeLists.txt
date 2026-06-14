@@ -13,10 +13,12 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 # ---------------------------------------------------------------------
 # Static library: telemetry_core (contains parser and analyzer)
 # ---------------------------------------------------------------------
+# Add static library with source files
 add_library(telemetry_core STATIC
     src/memory_mapped_file.cpp
     src/telemetry_analyzer.cpp
     src/telemetry_parser.cpp
+    src/csv_parser.cpp
 )
 # Export include path for consumers
 target_include_directories(telemetry_core PUBLIC ${PROJECT_SOURCE_DIR}/include)
@@ -51,3 +53,6 @@ target_link_libraries(telemetry_test PRIVATE telemetry_core gtest_main)
 target_include_directories(telemetry_test PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
 add_test(NAME telemetry_test COMMAND $<TARGET_FILE:telemetry_test>)
+
+# Adicionar o gerador de dados como um executavel utilitario
+add_executable(generate_data tools/generate_data.cpp)

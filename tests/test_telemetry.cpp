@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "telemetry_analyzer.hpp"
-#include "telemetry_parser.hpp"
-#include "telemetry_data.hpp"
+#include "csv_parser.hpp"
+#include "telemetry_record.hpp"
 
 #include <vector>
 #include <stdexcept>
@@ -9,7 +9,7 @@
 using namespace Telemetry;
 
 // Helper to create mock telemetry data
-static std::vector<TelemetryData> createMockData() {
+static std::vector<TelemetryRecord> createMockData() {
     return {
         {0, 80.0, 2500},
         {1000, 120.0, 3500},
@@ -23,7 +23,7 @@ TEST(TelemetryAnalyzerTest, MathCalculations) {
     auto data = createMockData();
     TelemetryAnalyzer analyzer(data);
     EXPECT_NEAR(analyzer.getAverageSpeed(), (80.0 + 120.0 + 95.0 + 105.0 + 90.0) / 5.0, 1e-5);
-    TelemetryData maxRpm = analyzer.getMaxRPM();
+    TelemetryRecord maxRpm = analyzer.getMaxRPM();
     EXPECT_EQ(maxRpm.rpm, 3500);
 }
 
@@ -37,6 +37,6 @@ TEST(TelemetryAnalyzerTest, CriticalEventsCounting) {
 }
 
 TEST(TelemetryParserTest, FileLoadError) {
-    TelemetryParser parser;
-    EXPECT_THROW(parser.loadFromCSV("nonexistent_file.csv"), std::runtime_error);
+    CsvParser parser;
+    EXPECT_THROW(parser.parse("nonexistent_file.csv"), std::runtime_error);
 }

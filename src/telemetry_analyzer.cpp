@@ -1,60 +1,86 @@
 #include "telemetry_analyzer.hpp"
 #include <algorithm>
+#include <atomic>
 #include <execution>
 #include <fstream>
 #include <iomanip>
+#include <mutex>
 #include <numeric>
 #include <stdexcept>
 
 namespace Telemetry {
 
-TelemetryAnalyzer::TelemetryAnalyzer(const std::vector<TelemetryData> &data)
+// Alterado de TelemetryData para TelemetryRecord
+TelemetryAnalyzer::TelemetryAnalyzer(const std::vector<TelemetryRecord> &data)
     : m_data(data) {}
 
 double TelemetryAnalyzer::getAverageSpeed() const {
-    if (m_data.empty())
-        return 0.0;
-    double sum = std::transform_reduce(std::execution::par, m_data.begin(), m_data.end(), 0.0,
-        std::plus<>(),
-        [](const TelemetryData &d) { return d.speed; });
-    return sum / m_data.size();
+  if (m_data.empty())
+    return 0.0;
+  double sum = 0.0;
+  std::mutex mtx;
+  std::for_each(std::execution::par, m_data.begin(), m_data.end(),
+                [&](const TelemetryRecord &r) {
+                  std::lock_guard<std::mutex> lk(mtx);
+                  sum += r.speed;
+                });
+  return sum / m_data.size();
 }
 
-TelemetryData TelemetryAnalyzer::getMaxRPM() const {
-    if (m_data.empty())
-        return TelemetryData{};
-    auto it = std::max_element(m_data.begin(), m_data.end(),
-        [](const TelemetryData &a, const TelemetryData &b) { return a.rpm < b.rpm; });
-    return *it;
+TelemetryRecord TelemetryAnalyzer::getMaxRPM() const {
+  if (m_data.empty())
+    return TelemetryRecord{};
+  TelemetryRecord maxRec = m_data.front();
+  std::mutex mtx;
+  std::for_each(std::execution::par, m_data.begin(), m_data.end(),
+                [&](const TelemetryRecord &r) {
+                  std::lock_guard<std::mutex> lk(mtx);
+                  if (r.rpm > maxRec.rpm)
+                    maxRec = r;
+                });
+  return maxRec;
 }
 
 int TelemetryAnalyzer::countOverspeedEvents(double speedLimit) const {
-    return static_cast<int>(std::count_if(std::execution::par, m_data.begin(), m_data.end(),
-        [speedLimit](const TelemetryData &d) { return d.speed > speedLimit; }));
+  std::atomic<int> cnt{0};
+  std::for_each(std::execution::par, m_data.begin(), m_data.end(),
+                [&](const TelemetryRecord &r) {
+                  if (r.speed > speedLimit)
+                    cnt.fetch_add(1, std::memory_order_relaxed);
+                });
+  return cnt.load();
 }
 
 int TelemetryAnalyzer::countHighRpmEvents(int32_t rpmLimit) const {
-    return static_cast<int>(std::count_if(std::execution::par, m_data.begin(), m_data.end(),
-        [rpmLimit](const TelemetryData &d) { return d.rpm > rpmLimit; }));
+  std::atomic<int> cnt{0};
+  std::for_each(std::execution::par, m_data.begin(), m_data.end(),
+                [&](const TelemetryRecord &r) {
+                  if (r.rpm > rpmLimit)
+                    cnt.fetch_add(1, std::memory_order_relaxed);
+                });
+  return cnt.load();
 }
 
-void TelemetryAnalyzer::generateReport(const std::string &filename, double speedLimit, int32_t rpmLimit) const {
-    std::ofstream out(filename);
-    if (!out.is_open()) {
-        throw std::runtime_error("Nao foi possivel criar o arquivo de relatorio: " + filename);
-    }
+void TelemetryAnalyzer::generateReport(const std::string &filename,
+                                       double speedLimit,
+                                       int32_t rpmLimit) const {
+  std::ofstream out(filename);
+  if (!out.is_open())
+    throw std::runtime_error("Nao foi possivel criar o arquivo de relatorio: " +
+                             filename);
 
-    int overspeedCount = countOverspeedEvents(speedLimit);
-    int highRpmCount = countHighRpmEvents(rpmLimit);
+  int overspeed = countOverspeedEvents(speedLimit);
+  int highRpm = countHighRpmEvents(rpmLimit);
+  TelemetryRecord maxRpm = getMaxRPM();
 
-    out << "=== RELATORIO DE TELEMETRIA ===\n";
-    out << "Registros processados: " << m_data.size() << "\n";
-    out << std::fixed << std::setprecision(2);
-    out << "Velocidade Media: " << getAverageSpeed() << " km/h\n";
-    out << "RPM Maximo: " << getMaxRPM().rpm << " RPM\n";
-    out << "--- ALERTAS CRITICOS ---\n";
-    out << "Eventos acima de " << speedLimit << " km/h: " << overspeedCount << "\n";
-    out << "Eventos acima de " << rpmLimit << " RPM: " << highRpmCount << "\n";
+  out << "=== RELATORIO DE TELEMETRIA ===\n";
+  out << "Registros processados: " << m_data.size() << "\n";
+  out << std::fixed << std::setprecision(2);
+  out << "Velocidade Media: " << getAverageSpeed() << " km/h\n";
+  out << "RPM Maximo: " << maxRpm.rpm << " RPM\n";
+  out << "--- ALERTAS CRITICOS ---\n";
+  out << "Eventos acima de " << speedLimit << " km/h: " << overspeed << "\n";
+  out << "Eventos acima de " << rpmLimit << " RPM: " << highRpm << "\n";
 }
 
 } // namespace Telemetry
