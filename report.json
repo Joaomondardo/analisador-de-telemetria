@@ -1,0 +1,16 @@
+{
+  "records": 89999985,
+  "averageSpeed": 85.00,
+  "maxRPM": 7000,
+  "averageAcceleration": 0.00,
+  "maxLateralG": 4.00,
+  "overspeedEvents": 20765170,
+  "highRpmEvents": 50798742,
+  "hardBrakingEvents": 35582235,
+  "curveEvents": 81540671,
+  "customChannel": {
+    "formula": "speed * 3.6",
+    "mean": 305.99,
+    "max": 540.00
+  }
+}

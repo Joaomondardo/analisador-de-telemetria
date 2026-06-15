@@ -1,0 +1,42 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "msvc_x64_with_qt",
+      "displayName": "MSVC 2026 x64 (with Qt prefix) [RECOMMENDED]",
+      "description": "Configure using Visual Studio 18 2026 x64 and set Qt prefix",
+      "generator": "Visual Studio 18 2026",
+      "architecture": "x64",
+      "cacheVariables": {
+        "CMAKE_PREFIX_PATH": "D:/QtSDK/6.7.3/msvc2022_64/lib/cmake",
+        "CMAKE_BUILD_TYPE": "Release"
+      },
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "ninja_release_with_qt",
+      "displayName": "Ninja Release (with Qt prefix) [FALLBACK]",
+      "description": "Configure using Ninja generator and set Qt prefix (fallback option)",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_PREFIX_PATH": "D:/QtSDK/6.7.3/msvc2022_64/lib/cmake",
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_COMPILER": "cl",
+        "CMAKE_CXX_COMPILER": "cl"
+      },
+      "binaryDir": "${sourceDir}/build-ninja"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "msvc_x64_with_qt",
+      "configurePreset": "msvc_x64_with_qt",
+      "configuration": "Release"
+    },
+    {
+      "name": "ninja_release_with_qt",
+      "configurePreset": "ninja_release_with_qt"
+    }
+  ]
+}

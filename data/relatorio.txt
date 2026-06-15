@@ -1,7 +1,7 @@
 === RELATORIO DE TELEMETRIA ===
-Registros processados: 5
-Velocidade Media: 88.64 km/h
-RPM Maximo: 3400 RPM
+Registros processados: 500000
+Velocidade Media: 84.99 km/h
+RPM Maximo: 7000 RPM
 --- ALERTAS CRITICOS ---
-Eventos acima de 100.00 km/h: 0
-Eventos acima de 3000 RPM: 3
+Eventos acima de 100.00 km/h: 192447
+Eventos acima de 3000 RPM: 321984

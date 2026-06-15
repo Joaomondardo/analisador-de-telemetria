@@ -36,6 +36,15 @@ TEST(TelemetryAnalyzerTest, CriticalEventsCounting) {
     EXPECT_EQ(analyzer.countHighRpmEvents(3000), 3); // 3500, 3200, 3100 exceed
 }
 
+TEST(TelemetryAnalyzerTest, PhysicsMetrics) {
+    auto data = createMockData();
+    TelemetryAnalyzer analyzer(data);
+    EXPECT_NEAR(analyzer.getAverageAcceleration(), 0.69444, 1e-5);
+    EXPECT_EQ(analyzer.countHardBrakingEvents(-4.0), 2);
+    EXPECT_EQ(analyzer.countCurveEvents(0.5), 2);
+    EXPECT_NEAR(analyzer.getMaxLateralG(), 4.0, 1e-5);
+}
+
 TEST(TelemetryParserTest, FileLoadError) {
     CsvParser parser;
     EXPECT_THROW(parser.parse("nonexistent_file.csv"), std::runtime_error);
