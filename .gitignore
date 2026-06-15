@@ -2,11 +2,12 @@
 # .gitignore — Analisador de Telemetria (C++ / CMake)
 # ============================================================
 
-# --- Diretório de build ---
+# --- Diretório de build e dependências ---
 build/
 out/
 cmake-build-*/
 _build/
+_deps/
 
 # --- Binários e objetos compilados ---
 *.exe
